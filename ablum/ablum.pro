@@ -29,14 +29,18 @@ SOURCES += \
     switchcontrol.cpp \
     hled.cpp \
     camera.cpp \
-    servo.cpp
+    servo.cpp \
+    infrared.cpp \
+    controller.cpp
 
 HEADERS += \
         mainwindow.h \
     switchcontrol.h \
     hled.h \
     camera.h \
-    servo.h
+    servo.h \
+    infrared.h \
+    controller.h
 
 FORMS += \
         mainwindow.ui
@@ -56,3 +60,5 @@ DISTFILES +=
 
 RESOURCES += \
     resource.qrc
+
+LIBS += -lwiringPi

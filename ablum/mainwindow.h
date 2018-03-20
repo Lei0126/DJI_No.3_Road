@@ -7,7 +7,7 @@
 #include <QThread>
 #include <QHash>
 #include "camera.h"
-#include "servo.h"
+#include "controller.h"
 
 namespace Ui {
 class MainWindow;
@@ -22,33 +22,33 @@ public:
     ~MainWindow();
 
 signals:
-    void capture();
+    void modeChange(const char mode);
+    void angleChange(const int degree);
+    void routeTimeChange(const int value);
 
 public slots:
     void onBtnLeftPressed();
     void onBtnRightPressed();
     void onBtnCapturePressed();
-    void onSwAutoToggled(bool status);
-    void onSwScanToggled(bool status);
-    void onSliderChanged(int value);
+    void onSwAutoToggled(const bool status);
+    void onSwScanToggled(const bool status);
+    void onSwRouteToggled(const bool status);
+    void onSliderChanged(const int value);
+    void onSliderRouteTimeChanged(const int value);
     void onPainted();
-    void onCameraOpened(bool isOpened);
+    void onCameraOpened(const bool isOpened);
     void onItemChanged(QListWidgetItem* item);
-    void onTimeout();
+    void onCaptured(const QString name);
 
 private:
     void initForm();
     void initConn();
     void setAutoly(bool isauto);
-    void setScan(bool isscan);
-    void addList();
     Ui::MainWindow  *ui;
-    Camera          m_cam;
-    Servo           m_servo;
-    QThread         m_camThread;
-    QTimer          m_camTimer;
-    QTimer          m_listTimer;
-    QHash<QString, QListWidgetItem*> m_hash;
+    Camera          *m_cam;
+    Controller      *m_controller;
+    QThread         m_threadCam;
+    QThread         m_threadControl;
 };
 
 #endif // MAINWINDOW_H
