@@ -4,6 +4,8 @@
 #include <fcntl.h>
 #include <QDebug>
 #include <QCoreApplication>
+#include <QDir>
+#include <QDateTime>
 
 #define Print()     qDebug() << " file:" << __FILE__ << " line:" <<__LINE__ <<" "
 
@@ -45,22 +47,21 @@ static QImage convert(Mat mat)
 
 Camera::Camera(QObject *parent) : QObject(parent)
 {
-    m_picNo =0;
     m_null.load(":/images/empty.jpg");
+    m_firstPath = QCoreApplication::applicationDirPath() + "/image";
+    m_fullPath = m_firstPath + "/" + QDateTime::currentDateTime().toString(tr("yy_MM_dd"));
+    QDir dir(m_fullPath);
+    if(!dir.exists())
+        dir.mkpath(m_fullPath);
     m_image =m_null;
 }
 
 void Camera::capture()
 {
-    if(m_pic.empty())
-        return;
-    QString name;
-    QString path = QCoreApplication::applicationDirPath();
-    do{
-        name =QString(path+"/image/%1.jpg").arg(m_picNo);
-        m_picNo++;
-    }while(access(name.toLatin1().data(), 0) != -1);
-    imwrite(name.toLatin1().data(), m_pic);
+    //Print() << QDateTime::currentDateTime().toString(tr("mm:ss:zzz"));
+    QString name = m_fullPath + QString("/%1.jpg").arg(QDateTime::currentDateTime().toString(tr("hh.mm.ss.zzz")));
+    if(!m_pic.empty()) imwrite(name.toLatin1().data(), m_pic);;
+    emit captured(name);
 }
 
 void Camera::onTimeout()
@@ -81,11 +82,16 @@ bool Camera::isOpened() const
     return m_cam.isOpened();
 }
 
-bool Camera::open()
+void Camera::open()
 {
     bool res = m_cam.open(0);
     emit opened(res);
-    return res;
+    if(res) {
+        m_tPlay = new QTimer();
+        m_tPlay->start(40);
+        Print() << "camera thread begin!";
+        connect(m_tPlay, SIGNAL(timeout()), this, SLOT(play()));
+    }
 }
 
 void Camera::close()
@@ -95,15 +101,10 @@ void Camera::close()
 
 void Camera::play()
 {
-
-}
-
-void Camera::setIsScan(bool scan)
-{
-    m_isScan =scan;
-}
-
-bool Camera::isScan() const
-{
-    return m_isScan;
+    m_cam >> m_pic;
+    if(m_pic.empty())
+        m_image =m_null;
+    else
+        m_image =convert(m_pic);
+    emit ready();
 }

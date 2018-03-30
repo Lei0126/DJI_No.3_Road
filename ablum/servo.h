@@ -2,6 +2,7 @@
 #define SERVO_H
 
 #include <QObject>
+#include <QTimer>
 
 class Servo : public QObject
 {
@@ -9,15 +10,21 @@ class Servo : public QObject
     Q_PROPERTY(int nowAngle READ nowAngle WRITE setNowAngle NOTIFY nowAngleChanged)
 public:
     explicit Servo(QObject *parent = nullptr);
+    ~Servo();
     Q_INVOKABLE const int nowAngle();
-    Q_INVOKABLE void setNowAngle(const int angle);
+    Q_INVOKABLE void setNowAngle(const int angle, bool capture =false);
 
 signals:
     void nowAngleChanged(const int &angle);
+    void completed();
 
 public slots:
+    void onTimeout();
 
 private:
+    void init();
+    void rotato(const int angle);
+    QTimer  m_finishTimer;
     int     m_nowAngle;
 };
 
