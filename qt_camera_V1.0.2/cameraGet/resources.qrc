@@ -1,6 +1,0 @@
-<RCC>
-    <qresource prefix="/new/prefix1">
-        <file>二月兰.jpg</file>
-        <file>大疆无人机.jpg</file>
-    </qresource>
-</RCC>
